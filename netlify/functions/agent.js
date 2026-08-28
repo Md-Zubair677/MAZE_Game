@@ -7,7 +7,7 @@ const credentials = process.env.MY_AWS_ACCESS_KEY_ID && process.env.MY_AWS_SECRE
   ? {
   accessKeyId: process.env.MY_AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.MY_AWS_SECRET_ACCESS_KEY,
-      ...(process.env.AWS_SESSION_TOKEN ? { sessionToken: process.env.AWS_SESSION_TOKEN } : {}),
+      ...(process.env.MY_AWS_SESSION_TOKEN ? { sessionToken: process.env.MY_AWS_SESSION_TOKEN } : {}),
     }
   : undefined;
 

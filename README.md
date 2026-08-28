@@ -70,9 +70,10 @@ MY_AWS_ACCESS_KEY_ID
 MY_AWS_SECRET_ACCESS_KEY
 MY_AWS_REGION
 BEDROCK_MODEL_ID
+# MY_AWS_SESSION_TOKEN (optional; required for temporary AWS credentials)
 ```
 
-Use a least-privilege AWS identity with permission to invoke the selected Bedrock model. Do not commit credentials or deploy until the variables are configured.
+Use a least-privilege AWS identity with permission to invoke the selected Bedrock model. `MY_AWS_SESSION_TOKEN` is required only when using temporary AWS credentials; long-lived IAM access-key credentials do not need it. Do not commit credentials or deploy until the variables are configured.
 
 ## 6. Test Bedrock
 
