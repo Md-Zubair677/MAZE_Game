@@ -146,16 +146,14 @@ export default async (request) => {
       },
     });
 
-    const t0 = Date.now();
     const response = await client.send(command);
-    const latencyMs = Date.now() - t0;
-    const usage = response.usage || {};
-    console.log('[Bedrock]', {
+    console.log('[Bedrock diagnostics]', {
+      accessKeyConfigured: Boolean(process.env.MY_AWS_ACCESS_KEY_ID),
+      secretKeyConfigured: Boolean(process.env.MY_AWS_SECRET_ACCESS_KEY),
+      sessionTokenConfigured: Boolean(process.env.MY_AWS_SESSION_TOKEN),
+      region: process.env.MY_AWS_REGION || 'us-east-1',
       modelId: MODEL_ID,
-      inputTokens: usage.inputTokens ?? null,
-      outputTokens: usage.outputTokens ?? null,
-      totalTokens: usage.totalTokens ?? null,
-      latencyMs,
+      httpStatus: 200,
     });
     const content = response?.output?.message?.content || [];
 
@@ -168,7 +166,16 @@ export default async (request) => {
       headers: { 'content-type': 'application/json' },
     });
   } catch (error) {
-    console.error('[Bedrock]', error);
+    console.error('[Bedrock diagnostics]', {
+      accessKeyConfigured: Boolean(process.env.MY_AWS_ACCESS_KEY_ID),
+      secretKeyConfigured: Boolean(process.env.MY_AWS_SECRET_ACCESS_KEY),
+      sessionTokenConfigured: Boolean(process.env.MY_AWS_SESSION_TOKEN),
+      region: process.env.MY_AWS_REGION || 'us-east-1',
+      modelId: MODEL_ID,
+      errorName: error instanceof Error ? error.name : 'UnknownError',
+      errorMessage: error instanceof Error ? error.message : String(error),
+      httpStatus: 500,
+    });
     return new Response(JSON.stringify({
       error: error instanceof Error ? error.message : String(error),
     }), {
