@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Maze Escape — AI Challenge</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Start screen -->
+    <section id="startScreen" class="start-screen" aria-labelledby="startTitle">
+      <div class="start-logo" aria-hidden="true">⬡</div>
+      <p class="eyebrow">Human + AI Maze Challenge</p>
+      <h1 id="startTitle">MAZE ESCAPE</h1>
+      <p class="start-copy">Navigate the maze yourself — or let the AI agent find and play the shortest path for you.</p>
+      <div class="start-modes">
+        <div class="start-mode">
+          <span class="mode-icon">🎮</span>
+          <strong>Play Yourself</strong>
+          <span>Arrow keys or D-pad</span>
+        </div>
+        <div class="start-mode-divider">OR</div>
+        <div class="start-mode">
+          <span class="mode-icon">✨</span>
+          <strong>Let AI Solve</strong>
+          <span>One click, watch it play</span>
+        </div>
+      </div>
+      <button id="startGameBtn" class="start-btn" type="button">Start Game →</button>
+      <p class="start-hint">Arrow keys · WASD · D-pad buttons</p>
+    </section>
+
+    <!-- Main app -->
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="topbar-brand">
+          <h1>MAZE ESCAPE</h1>
+          <p class="topbar-sub">Human + AI Maze Challenge</p>
+        </div>
+        <div class="topbar-right">
+          <label class="difficulty-wrap" for="difficultySelect">
+            <span>Size</span>
+            <select id="difficultySelect" aria-label="Maze size">
+              <option value="10">10 × 10</option>
+              <option value="20">20 × 20</option>
+              <option value="30">30 × 30</option>
+            </select>
+          </label>
+        </div>
+      </header>
+
+      <main class="game-layout">
+
+        <!-- LEFT: Controls -->
+        <aside class="panel controls-panel" aria-label="Controls">
+          <div class="panel-header">
+            <span class="panel-title">CONTROLS</span>
+          </div>
+
+          <div class="play-mode-badge">
+            <span class="mode-dot"></span>
+            PLAY YOURSELF
+          </div>
+          <p class="controls-hint">Use Arrow Keys or Buttons</p>
+
+          <div class="dpad" aria-label="Movement controls">
+            <div class="dpad-row dpad-top">
+              <button class="dpad-btn" data-direction="up" aria-label="Move up">↑</button>
+            </div>
+            <div class="dpad-row dpad-mid">
+              <button class="dpad-btn" data-direction="left" aria-label="Move left">←</button>
+              <div class="dpad-center" aria-hidden="true"></div>
+              <button class="dpad-btn" data-direction="right" aria-label="Move right">→</button>
+            </div>
+            <div class="dpad-row dpad-bot">
+              <button class="dpad-btn" data-direction="down" aria-label="Move down">↓</button>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-label">Moves</span>
+              <strong id="movesValue" class="stat-value">0</strong>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Time</span>
+              <strong id="timerValue" class="stat-value">00:00</strong>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Status</span>
+              <strong id="statusValue" class="stat-value status-val">Ready</strong>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Remaining</span>
+              <strong id="timeLimit" class="stat-value">02:00</strong>
+            </div>
+          </div>
+
+          <div class="bottom-controls">
+            <button id="hintBtn" class="ghost-btn" type="button">💡 Hint</button>
+            <button id="continueAiBtn" class="continue-ai-btn" type="button">🤖 PixelForge</button>
+          </div>
+
+          <!-- Hidden HUD elements kept for app.js compatibility -->
+          <span id="livesValue" style="display:none">3</span>
+          <span id="scoreValue" style="display:none">0</span>
+          <span id="levelValue" style="display:none">1</span>
+          <p id="hintText" style="display:none"></p>
+        </aside>
+
+        <!-- CENTER: Maze -->
+        <section class="maze-panel" aria-label="Maze">
+          <div id="mazeBoard" class="maze-board" aria-label="Maze board" role="grid" aria-live="polite"></div>
+          <div class="maze-labels">
+            <span class="maze-label-start">▶ START</span>
+            <span class="maze-label-exit">EXIT ◀</span>
+          </div>
+        </section>
+
+        <!-- RIGHT: AI Agent -->
+        <aside class="panel ai-panel" aria-label="AI Agent">
+          <div class="panel-header">
+            <span class="panel-title">AI AGENT</span>
+            <span id="webmcpStatus" class="webmcp-badge offline" aria-live="polite">● Offline</span>
+          </div>
+
+          <div class="ai-status-block">
+            <div id="aiPhaseText" class="ai-phase">Ready to solve</div>
+            <div id="aiProgressText" class="ai-progress" aria-live="polite"></div>
+          </div>
+
+          <div class="ai-log-block">
+            <div class="ai-log-label">Agent Log</div>
+            <p id="agentLog" class="ai-log-value" aria-live="polite">Agent ready.</p>
+          </div>
+
+          <div class="ai-prompt-block">
+            <div class="ai-log-label">Custom Prompt</div>
+            <textarea id="agentPrompt" class="dev-prompt" rows="3" placeholder="Custom agent prompt…"></textarea>
+            <button id="agentClearBtn" class="ghost-btn ghost-btn-sm" type="button">Clear</button>
+          </div>
+
+          <div class="ai-stats">
+            <div class="stat-item">
+              <span class="stat-label">AI Moves</span>
+              <strong id="aiMovesValue" class="stat-value">—</strong>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">AI Time</span>
+              <strong id="aiTimeValue" class="stat-value">—</strong>
+            </div>
+          </div>
+
+          <button id="agentRunBtn" class="solve-btn" type="button">
+            <span class="solve-btn-icon">✨</span>
+            <span id="solveBtnLabel">Start Game</span>
+          </button>
+
+          <div class="ai-divider"></div>
+
+          <!-- Collapsed dev log -->
+          <details class="dev-log">
+            <summary class="dev-log-toggle">Developer / AI Log ▸</summary>
+            <div class="dev-log-body">
+              <div class="dev-log-section">
+                <div class="dev-log-label">WebMCP</div>
+                <div id="webmcpState" class="dev-log-value">Unavailable</div>
+              </div>
+              <div class="dev-log-section">
+                <div class="dev-log-label">Hint</div>
+                <div class="dev-log-value">Use get_maze_state() or find_solution().</div>
+              </div>
+              <div class="dev-log-section">
+                <div class="dev-log-label">Registered Tools</div>
+                <ul id="webmcpTools" class="dev-tools-list">
+                  <li>get_maze_state</li>
+                  <li>get_player_state</li>
+                  <li>get_available_moves</li>
+                  <li>move_player</li>
+                  <li>restart_game</li>
+                  <li>get_game_status</li>
+                  <li>find_solution</li>
+                  <li>execute_solution</li>
+                </ul>
+              </div>
+              <p class="dev-note">Powered by Amazon Bedrock · WebMCP Inspector compatible</p>
+            </div>
+          </details>
+        </aside>
+      </main>
+
+      <footer class="app-footer">
+        <button id="newMazeBtn" class="ghost-btn" type="button">New Maze</button>
+        <button id="resetBtn" class="ghost-btn" type="button">Reset</button>
+      </footer>
+    </div>
+
+    <script src="app.js" defer></script>
+    <script>
+      // Wire up the AI panel UI driven by executeSolution progress
+      (function () {
+        const phaseEl = document.getElementById('aiPhaseText');
+        const progressEl = document.getElementById('aiProgressText');
+        const solveBtn = document.getElementById('agentRunBtn');
+        const solveLbl = document.getElementById('solveBtnLabel');
+        const successBlock = document.getElementById('aiSuccessBlock');
+        const successDetail = document.getElementById('aiSuccessDetail');
+        const aiMovesEl = document.getElementById('aiMovesValue');
+        const aiTimeEl = document.getElementById('aiTimeValue');
+
+        let aiStartTime = null;
+        let aiTimerInterval = null;
+
+        function startAiTimer() {
+          aiStartTime = Date.now();
+          clearInterval(aiTimerInterval);
+          aiTimerInterval = setInterval(() => {
+            const elapsed = Math.floor((Date.now() - aiStartTime) / 1000);
+            const m = String(Math.floor(elapsed / 60)).padStart(2, '0');
+            const s = String(elapsed % 60).padStart(2, '0');
+            if (aiTimeEl) aiTimeEl.textContent = `${m}:${s}`;
+          }, 500);
+        }
+
+        function stopAiTimer() {
+          clearInterval(aiTimerInterval);
+        }
+
+        // Intercept setAgentLogLines to drive the AI panel
+        const _origLines = window._setAgentLogLines;
+
+        // Poll for app.js to expose the hook
+        function patchAgentLog() {
+          const origSetLines = window.setAgentLogLines;
+          if (typeof origSetLines === 'function') return; // already patched by app.js
+
+          // Override after app.js loads via MutationObserver on agentLog
+          const logEl = document.getElementById('agentLog');
+          if (!logEl) return;
+
+          const observer = new MutationObserver(() => {
+            const text = logEl.textContent || '';
+            syncAiPanel(text);
+          });
+          observer.observe(logEl, { childList: true, subtree: true, characterData: true });
+        }
+
+        function syncAiPanel(text) {
+          if (!phaseEl) return;
+
+          if (text.includes('Maze escaped') || text.includes('escaped')) {
+            stopAiTimer();
+            const moves = document.getElementById('movesValue')?.textContent || '?';
+            const time = aiTimeEl?.textContent || '?';
+            if (phaseEl) phaseEl.textContent = '✓ Maze Escaped!';
+            if (progressEl) progressEl.textContent = '';
+            if (successBlock) successBlock.hidden = false;
+            if (successDetail) successDetail.textContent = `${moves} moves · ${time}`;
+            if (aiMovesEl) aiMovesEl.textContent = moves;
+            if (solveLbl) solveLbl.textContent = 'PLAY AGAIN';
+            solveBtn?.classList.add('solve-btn-success');
+          } else if (text.includes('Move ') && text.includes('/')) {
+            const match = text.match(/Move (\d+)\/(\d+)/);
+            if (match) {
+              if (phaseEl) phaseEl.textContent = 'AI is solving…';
+              if (progressEl) progressEl.textContent = `Move ${match[1]} / ${match[2]}`;
+              if (aiMovesEl) aiMovesEl.textContent = match[1];
+            }
+          } else if (text.includes('Finding solution') || text.includes('Analyzing')) {
+            if (phaseEl) phaseEl.textContent = 'Finding shortest path…';
+            if (progressEl) progressEl.textContent = 'Analyzing maze…';
+          } else if (text.includes('Executing')) {
+            if (phaseEl) phaseEl.textContent = 'AI is solving…';
+          } else if (text.includes('Connecting') || text.includes('Bedrock')) {
+            if (phaseEl) phaseEl.textContent = 'AI is analyzing…';
+            if (progressEl) progressEl.textContent = '';
+            if (successBlock) successBlock.hidden = true;
+            solveBtn?.classList.remove('solve-btn-success');
+            if (solveLbl) solveLbl.textContent = 'SOLVING…';
+            startAiTimer();
+          } else if (text.includes('restarted') || text.includes('reset')) {
+            if (phaseEl) phaseEl.textContent = 'Ready to solve';
+            if (progressEl) progressEl.textContent = '';
+            if (successBlock) successBlock.hidden = true;
+            if (aiMovesEl) aiMovesEl.textContent = '—';
+            if (aiTimeEl) aiTimeEl.textContent = '—';
+            if (solveLbl) solveLbl.textContent = 'Start Game';
+            solveBtn?.classList.remove('solve-btn-success');
+            stopAiTimer();
+          } else if (text.includes('Agent ready') || text.includes('ready')) {
+            if (phaseEl) phaseEl.textContent = 'Ready to solve';
+            if (solveLbl) solveLbl.textContent = 'Start Game';
+            solveBtn?.classList.remove('solve-btn-success');
+          }
+        }
+
+        // Also intercept the solve button to fire the default Bedrock prompt
+        document.addEventListener('DOMContentLoaded', () => {
+          patchAgentLog();
+
+          const btn = document.getElementById('agentRunBtn');
+          const promptEl = document.getElementById('agentPrompt');
+          const DEFAULT_PROMPT = 'Restart the Maze Escape game if it is not currently active. Get the current maze state, find the shortest valid solution, actually play the maze using the available tools, and verify the final game status.';
+
+          btn?.addEventListener('click', () => {
+            if (promptEl && !promptEl.value.trim()) {
+              promptEl.value = DEFAULT_PROMPT;
+            }
+          }, true);
+
+          const continueAiBtn = document.getElementById('continueAiBtn');
+          const CONTINUE_PROMPT = 'The player is already partway through the maze. Do NOT restart the game. Get the current player position, find the shortest path to the exit from where the player currently is, execute the solution, and confirm the final status.';
+
+          continueAiBtn?.addEventListener('click', () => {
+            if (promptEl) promptEl.value = CONTINUE_PROMPT;
+            document.querySelector('.ai-panel')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            document.getElementById('agentRunBtn')?.click();
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>
