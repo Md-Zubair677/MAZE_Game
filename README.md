@@ -66,8 +66,8 @@ This repository includes `netlify.toml`, which publishes the project root and re
 In the Netlify site settings, add these environment variables:
 
 ```text
-AWS_ACCESS_KEY_ID
-AWS_SECRET_ACCESS_KEY
+MY_AWS_ACCESS_KEY_ID
+MY_AWS_SECRET_ACCESS_KEY
 AWS_REGION
 BEDROCK_MODEL_ID
 ```
