@@ -68,7 +68,7 @@ In the Netlify site settings, add these environment variables:
 ```text
 MY_AWS_ACCESS_KEY_ID
 MY_AWS_SECRET_ACCESS_KEY
-AWS_REGION
+MY_AWS_REGION
 BEDROCK_MODEL_ID
 ```
 
