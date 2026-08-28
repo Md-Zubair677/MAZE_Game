@@ -1,18 +1,21 @@
 import { BedrockRuntimeClient, ConverseCommand } from '@aws-sdk/client-bedrock-runtime';
 
-const MY_AWS_REGION = process.env.MY_AWS_REGION || 'us-east-1';
 const MODEL_ID = process.env.BEDROCK_MODEL_ID || 'global.anthropic.claude-haiku-4-5-20251001-v1:0';
 
-const credentials = process.env.MY_AWS_ACCESS_KEY_ID && process.env.MY_AWS_SECRET_ACCESS_KEY
-  ? {
-  accessKeyId: process.env.MY_AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.MY_AWS_SECRET_ACCESS_KEY,
-      ...(process.env.MY_AWS_SESSION_TOKEN ? { sessionToken: process.env.MY_AWS_SESSION_TOKEN } : {}),
-    }
-  : undefined;
+const credentials =
+  process.env.MY_AWS_ACCESS_KEY_ID &&
+  process.env.MY_AWS_SECRET_ACCESS_KEY
+    ? {
+        accessKeyId: process.env.MY_AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.MY_AWS_SECRET_ACCESS_KEY,
+        ...(process.env.MY_AWS_SESSION_TOKEN
+          ? { sessionToken: process.env.MY_AWS_SESSION_TOKEN }
+          : {}),
+      }
+    : undefined;
 
 const client = new BedrockRuntimeClient({
-  region: MY_AWS_REGION,
+  region: process.env.MY_AWS_REGION || 'us-east-1',
   credentials,
 });
 
